@@ -38,12 +38,62 @@
 
 - name: 'Install packages'
   apt:
-    pkg={{item}}
+    name={{item}}
     state=installed
   become: yes
   become_method: sudo
   with_items:
-    - tightvncserver
+    - git 
+    - python3 
+    - python3-pip 
+    - python3-venv
+    - libnl-3-dev
+    - libnl-genl-3-dev
+
+- name: 'Get git repositories'
+  become: yes
+  become_user: pi
+  git: 
+    repo: https://github.com/linusmotu/random_pi_forest.git 
+    version: WIP 
+    dest: /home/pi/git/random_pi_forest
+
+- name: 'Get sockets repo'
+  become: yes
+  become_user: pi
+  git: 
+    repo: https://github.com/linusmotu/flask_socketsio.git 
+    version: master 
+    dest: /home/pi/git/flask_socketsio
+
+- name: 'Get batctl repo'
+  become: yes
+  become_user: pi
+  git: 
+    repo: https://git.open-mesh.org/batctl.git 
+    version: master 
+    dest: /home/pi/git/batctl
+
+# Make install batcl after git clone
+- make:
+    chdir: /home/pi/git/batctl
+    target: install
+  become: yes
+  become_method: sudo
+
+# Setup mesh on the node
+- name: 'Get mesh IP'
+  set_fact:
+    contents={{ lookup('file', '../../../mesh_ip.txt') }}
+    
+- name: 'Setup mesh network'
+  command: "sh /home/pi/git/random_pi_forest/scripts/manscript.sh force {{contents}}"
+
+# I don't see the use of the previous steps now (for mesh)
+- name: 'Update bashrc so do manscript on reboot.'
+  lineinfile:
+      path: /home/pi/.bashrc
+      line: '/home/pi/git/random_pi_forest/scripts/manscript.sh 0 {{contents}}'
 
 - name: 'Reboot'
   become: yes

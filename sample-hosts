@@ -1,3 +1,3 @@
 [pis]
-YOUR_PI_IP_HERE ansible_user=YOUR_PI_USERNAME_HERE ansible_password=YOUR_PI_PASSWORD_HERE
+163.221.68.232 ansible_user=pi ansible_password=raspberry
 
